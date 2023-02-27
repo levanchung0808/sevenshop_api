@@ -64,6 +64,9 @@ export const setPassword = async (req: Request, res: Response) => {
   if (!user) {
     return res.status(404).json({ message: "User not found" });
   }
+  if (user.status === STATUS.active) {
+    return res.status(500).json({ message: "User already set password" });
+  }
   const salt = await bcrypt.genSalt(10);
   const hashPassword = await bcrypt.hash(password, salt);
   const access_token = tokenGen(
