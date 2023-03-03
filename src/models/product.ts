@@ -1,97 +1,42 @@
-import mongoose, { Document, model, Schema } from "mongoose";
+import { STATUS_PRODUCT } from "constants/product";
+import { IModify, Modify } from "interfaces/basic";
+import { IStock, Stock } from "interfaces/product";
+import { Document, model, Schema } from "mongoose";
+
 /*********************TYPE & INTERFACE*****************************/
 
-export interface IProduct extends Document {
+export type IProduct = {
   name: string;
   price: number;
   price_sale: number;
   description: string;
   images: string[];
-  active: boolean;
-  storage_quantity: number;
-  properties_type: [
-    {
-      color_id: mongoose.Types.ObjectId;
-      size_id: mongoose.Types.ObjectId;
-      quantity: number;
-    }
-  ];
-  categories_type: string;
+  stock: IStock[];
+  status: STATUS_PRODUCT;
+  categories: [];
   create_at: string;
   create_by: string;
-  modify_at: string;
-  modify_by: string;
-}
+  modify: IModify[];
+};
+
+export type ProductTypeModel = IProduct & Document;
 
 /*******************************SCHEMA*****************************/
 
 const productSchema: Schema = new Schema({
-  name: {
-    type: String,
-    required: true,
-  },
-  price: {
-    type: Number,
-    required: true,
-  },
-  price_sale: {
-    type: Number,
-    required: true,
-    default: 0,
-  },
-  description: {
-    type: String,
-    required: true,
-  },
-  images: {
-    type: [String],
-    required: true,
-  },
-  active: {
-    type: Boolean,
-    required: true,
-  },
-  storage_quantity: {
-    type: Number,
-    required: true,
-    default: 0,
-  },
-  properties_type: [
-    {
-      color_id: {
-        type: mongoose.Types.ObjectId,
-        required: true,
-      },
-      size_id: {
-        type: mongoose.Types.ObjectId,
-        required: true,
-      },
-      quantity: {
-        type: Number,
-        required: true,
-      },
-    },
-  ],
-  categories_type: {
-    type: String,
-    required: true,
-  },
-  create_at: {
-    type: String,
-    required: true,
-  },
-  create_by: {
-    type: String,
-    required: true,
-  },
-  modify_at: {
-    type: String,
-  },
-  modify_by: {
-    type: String,
-  },
+  name: { type: String, require: true },
+  price: { type: Number, require: true },
+  price_sale: { type: Number, require: true },
+  description: { type: String, require: true },
+  images: { type: Array, require: true },
+  stock: { type: [Stock], require: true },
+  status: { type: String, enum: STATUS_PRODUCT, default: "inactive" },
+  categories: [{ type: Schema.Types.ObjectId, ref: "Category" }],
+  create_at: { type: String, require: true },
+  create_by: { type: String, require: true },
+  modify: { type: [Modify], require: true },
 });
 
-const Product = model<IProduct>("Product", productSchema);
+const Product = model<ProductTypeModel>("Product", productSchema);
 
 export default Product;

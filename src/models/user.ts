@@ -1,110 +1,59 @@
+import { GENDER, ROLE, STATUS_USER } from "constants/user";
+import { IModify, IOTP, Modify, OTP } from "interfaces/basic";
+import { Address, IAddress, IMembership } from "interfaces/user";
 import Product from "models/product";
-import mongoose, { Schema, model, Document } from "mongoose";
+import { Schema, model, Document } from "mongoose";
 
 /*********************TYPE & INTERFACE*****************************/
 
-export enum GENDER {
-  male = "male",
-  female = "female",
-  other = "other",
-}
-
-export enum LANGUAGE {
-  vie = 1,
-  eng = 2,
-  kr = 3,
-}
-
-export enum STATUS {
-  active = "active",
-  inactive = "inactive",
-  pending = "pending",
-}
-
-export enum ROLE {
-  user = 1,
-  admin = 2,
-  staff = 3,
-}
-
-export type OTPType = {
-  code: string;
-  expired: Date;
-};
-
-export type AddressType = {
-  _id: string;
-  address: string;
-  full_name: string;
-  phone: string;
-  default_address: boolean;
-};
-
-export type UserType = {
-  id: string;
+export type IUser = {
   email: string;
   password: string;
   full_name: string;
   phone: string;
-  image: string;
+  avatar: string;
+  cover_image: string;
   gender: GENDER;
   birthday: string;
-  address: AddressType[];
-  status: STATUS;
+  address: IAddress[];
+  status: STATUS_USER;
   product_favorites: [];
-  recent_products: string[];
-  language: LANGUAGE;
-  device_id: string;
-  otp: OTPType;
+  recent_products: [];
+  otp: IOTP;
   access_token: string;
   refresh_token: string;
-  role_type: ROLE;
-  membership_type: number;
+  role: ROLE;
+  membership: IMembership;
   create_at: string;
   create_by: string;
-  modify_at: string;
-  modify_by: string;
+  modify: IModify[];
 };
 
-export type UserTypeModel = UserType & Document;
+export type UserTypeModel = IUser & Document;
 
 /*******************************SCHEMA*****************************/
-
-export const Otp = {
-  code: String,
-  expired: Date,
-};
-
-export const Address = {
-  address: String,
-  full_name: String,
-  phone: String,
-  default_address: Boolean,
-};
 
 export const userSchema = new Schema({
   email: { type: String },
   password: { type: String },
   full_name: { type: String },
   phone: { type: String },
-  image: { type: String },
+  avatar: { type: String },
+  cover_image: { type: String },
   gender: { type: String, enum: GENDER },
   birthday: { type: String },
-  address: [{ type: Address }],
-  status: { type: String, enum: STATUS, default: "pending" },
+  address: [Address],
+  status: { type: String, enum: STATUS_USER, default: "pending" },
   product_favorites: [{ type: Schema.Types.ObjectId, ref: Product }],
-  recent_products: [{ type: String }],
-  language: { type: Number, enum: LANGUAGE, default: 1 },
-  device_id: { type: String },
-  otp: { type: Otp, default: {} },
+  recent_products: [{ type: Schema.Types.ObjectId, ref: Product }],
+  otp: { type: OTP, default: {} },
   access_token: { type: String },
   refresh_token: { type: String },
-  role_type: { type: Number, enum: ROLE, default: 1 },
+  role: { type: String, default: "user" },
   membership_type: { type: Number, default: 1 },
   create_at: { type: String, default: new Date() },
   create_by: { type: String },
-  modify_at: { type: String },
-  modify_by: { type: String },
+  modify: [Modify],
 });
 
 const User = model<UserTypeModel>("User", userSchema);

@@ -1,8 +1,11 @@
 import moment from "moment";
-import User, { OTPType, STATUS } from "models/user";
+import User from "models/user";
 import { Types } from "mongoose";
 import { Response } from "express";
 import nodemailer from "nodemailer";
+import { STATUS_USER } from "constants/user";
+import { IOTP } from "interfaces/basic";
+import Log from "libraries/log";
 
 type AccountVerifyType = {
   email?: string;
@@ -50,7 +53,7 @@ const sendMail = (
   };
   transporter.sendMail(mailOptions, async (err) => {
     if (err) {
-      console.log(err);
+      Log.error(err);
       return res.status(500).json({ message: "Send email fail" });
     }
     return res.status(200).json({
@@ -73,10 +76,10 @@ export const accountVerify = async (props: AccountVerifyType) => {
   const { email, phone, res } = props;
   const user = await User.findOne(email ? { email } : { phone });
   if (user) {
-    if (user.status === STATUS.active) {
+    if (user.status === STATUS_USER.active) {
       return res.status(500).json({ message: "Account already exists" });
     }
-    if (user.status === STATUS.pending) {
+    if (user.status === STATUS_USER.pending) {
       if (email) {
         const otp = await checkDateOTP(user._id);
         if (!otp) {
@@ -94,14 +97,14 @@ export const accountVerify = async (props: AccountVerifyType) => {
     }
   }
   // create new user
-  const otp = (await generateOTP()) as OTPType;
+  const otp = (await generateOTP()) as IOTP;
   const newUser = new User({
     email,
     phone,
     otp,
   });
   newUser.create_at = moment(new Date()).format("YYYY-MM-DD HH:mm");
-  newUser.create_by = "REGISTER|";
+  newUser.create_by = "user";
   await newUser.save();
   if (email) {
     sendMail(newUser._id, otp.code, newUser.email, res, "Register");
@@ -119,7 +122,7 @@ export const accountVerifyPassword = async (props: AccountVerifyType) => {
   const { email, phone, res } = props;
   const user = await User.findOne(email ? { email } : { phone });
   if (user) {
-    if (user.status === STATUS.active) {
+    if (user.status === STATUS_USER.active) {
       if (email) {
         const otp = await checkDateOTP(user._id);
         if (!otp) {

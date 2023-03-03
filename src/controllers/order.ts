@@ -4,7 +4,6 @@ import moment from "moment";
 import { Request, Response } from "express";
 import User from "models/user";
 import { getIdFromReq, parseJwt, tokenGen } from "utils/token";
-import { Stats } from "fs";
 import { Types } from "mongoose";
 
 export const getAll = async (req: Request, res: Response) => {
@@ -74,10 +73,6 @@ export const addToCart = async (req: Request, res: Response) => {
 
     if (!product) {
       res.status(500).json({ message: "Product not found" });
-    }
-
-    if (quantity > Number(product?.storage_quantity)) {
-      return res.status(500).json({ message: "Not enough quantity in stock" });
     }
 
     const orderCount = await Order.count();

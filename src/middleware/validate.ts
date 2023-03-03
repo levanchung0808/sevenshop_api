@@ -11,50 +11,50 @@ export const validateToken = async (
 ) => {
   const token = req.headers.authorization?.slice(7); // cut Bearer
   if (!token) {
-    Log.error(`Access denied: ${req.method} ${req.originalUrl}`);
     return res.status(401).json({ message: "Access denied" });
   }
-  try {
-    const _id = parseJwt(token)._id;
-    const user = await User.findById(_id);
-    if (!user) {
-      return res.status(400).json({ message: "Invalid token" });
-    }
-    if (user.access_token !== token) {
-      return res.status(400).json({ message: "Invalid token" });
-    }
-    if (!token) {
-      return res.status(401).json({ message: "Access denied" });
-    }
-  } catch (err) {
+  const { _id } = parseJwt(token);
+  const user = await User.findById(_id);
+  if (!user) {
+    return res.status(400).json({ message: "Invalid token" });
+  }
+  if (user.access_token !== token) {
     return res.status(400).json({ message: "Invalid token" });
   }
   try {
-    await jwt.verify(token, process.env.JWT_SECRET || "");
+    jwt.verify(token, process.env.JWT_SECRET || "");
     next();
   } catch (err) {
     return res.status(400).json({ message: "Invalid token" });
   }
 };
 
-export const validateAdmin = (
+export const validateAdmin = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   const token = req.header("Authorization")?.slice(7); // cut Bearer
   if (!token) {
-    Log.error(`Access denied: ${req.method} ${req.originalUrl}`);
     return res.status(401).json({ message: "Access denied" });
   }
-  const { role_type } = parseJwt(token ?? "");
-  //1: USER
-  //2: ADMIN
-  if (role_type === 2) {
+  const { role, _id } = parseJwt(token);
+  Log.info(role);
+  const user = await User.findById(_id);
+  if (!user) {
+    return res.status(400).json({ message: "Invalid token" });
+  }
+  if (user.access_token !== token) {
+    return res.status(400).json({ message: "Invalid token" });
+  }
+  if (role !== "admin") {
+    return res.status(401).json({ message: "Access denied" });
+  }
+  try {
+    jwt.verify(token, process.env.JWT_SECRET || "");
     next();
-  } else {
-    return res.status(401).send({
-      message: "You Do Not Have Permission To Access This Content",
-    });
+  }
+  catch (err) {
+    return res.status(400).json({ message: "Invalid token" });
   }
 };

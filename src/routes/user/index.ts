@@ -1,50 +1,23 @@
-import { Router } from "express";
 import {
-  register,
-  checkOTP,
-  login,
-  setPassword,
-  getMe,
-  logout,
-  refreshToken,
-  getUsers,
-  getUserByID,
-  updateUser,
+  deleteAddress,
   deleteUser,
-  changePassword,
-  forgotPassword,
+  getUserByID,
+  getUsers,
   insertAddress,
   updateAddress,
-  deleteAddress,
+  updateUser,
 } from "controllers/user";
-import { validateToken, validateAdmin } from "middleware/validate";
-import { upload } from "utils/cloudinary";
+import { Router } from "express";
+import { validateAdmin, validateToken } from "middleware/validate";
 
 const router = Router();
 
 //Auth routes
-router.post("/register", register);
-router.post("/check_otp", checkOTP);
-router.post("/forgotPassword", forgotPassword);
-router.post("/set_password", validateToken, setPassword);
-router.post("/login", login);
-router.post("/logout", validateToken, logout);
-router.post("/refresh_token", refreshToken);
 router.post("/insertAddress", validateToken, insertAddress);
 router.post("/updateAddress/:id", validateToken, updateAddress);
 router.post("/deleteAddress/:id", validateToken, deleteAddress);
+router.put("/updateUser/:id", validateToken, updateUser);
 
-//User Routes (role==='USER')
-router.get("/me", validateToken, getMe);
-router.post(
-  "/updateUser/:id",
-  validateToken,
-  upload.single("image"),
-  updateUser
-);
-router.post("/changePassword", validateToken, changePassword);
-
-//User Routes (role==='ADMIN')
 router.get("/", validateToken, validateAdmin, getUsers);
 router.get("/:id", validateToken, validateAdmin, getUserByID);
 router.post("/deleteUser/:id", validateToken, validateAdmin, deleteUser);
