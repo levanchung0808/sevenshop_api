@@ -101,8 +101,8 @@ export const addToCart = async (req: Request, res: Response) => {
         products: [_product],
         order_type: STATUS.CART,
         payment_type: PaymentType.CASH,
-        create_at: moment(new Date()).format("YYYY-MM-DD HH:mm"),
-        create_by:
+        created_at: moment(new Date()).format("YYYY-MM-DD HH:mm"),
+        created_by:
           user?.email + "_INS_" + moment(new Date()).format("YYYY-MM-DD HH:mm"),
       });
       const cart = await cartItem.save();

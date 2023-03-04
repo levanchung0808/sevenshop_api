@@ -4,8 +4,8 @@ export type IModify = {
 };
 
 export type IOTP = {
-  code: string;
-  expired: Date;
+  code: number | undefined;
+  exp: string;
 };
 
 export const Modify = {
@@ -14,6 +14,6 @@ export const Modify = {
 };
 
 export const OTP = {
-  code: String,
-  expired: Date,
+  code: Number,
+  exp: String,
 };

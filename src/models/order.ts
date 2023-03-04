@@ -32,8 +32,8 @@ export interface IOrder extends mongoose.Document {
   order_type: STATUS;
   payment_type: string;
   voucher_type?: string;
-  create_at: string;
-  create_by: string;
+  created_at: string;
+  created_by: string;
   modify_at: string;
   modify_by: string;
 }
@@ -69,8 +69,8 @@ const orderSchema = new mongoose.Schema({
     enum: PaymentType,
   },
   voucher_type: { type: Number },
-  create_at: { type: String },
-  create_by: { type: String },
+  created_at: { type: String },
+  created_by: { type: String },
   modify_at: { type: String },
   modify_by: { type: String },
 });

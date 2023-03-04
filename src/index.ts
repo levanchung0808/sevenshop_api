@@ -4,11 +4,14 @@ import mongoose from "mongoose";
 import userRouter from "routes/user";
 import productRouter from "routes/product";
 import authRouter from "routes/auth";
-// import orderRouter from "routes/order";
+import categoryRouter from "routes/category";
 import { config } from "dotenv";
 import Log from "libraries/log";
 import cors from "cors";
 import bodyParser from "body-parser";
+import helmet from "helmet";
+import nocache from "nocache";
+import morgan from "morgan";
 
 const app = express();
 config();
@@ -57,10 +60,14 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use(morgan("dev"));
+app.use(helmet());
+app.use(nocache());
+
 /* Routes */
 app.use("/users", userRouter);
 app.use("/products", productRouter);
-// app.use("/order", orderRouter);
+app.use("/categories", categoryRouter);
 app.use("/auth", authRouter);
 
 app.get("/ping", (req, res: Response) => {

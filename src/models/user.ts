@@ -1,6 +1,6 @@
 import { GENDER, ROLE, STATUS_USER } from "constants/user";
 import { IModify, IOTP, Modify, OTP } from "interfaces/basic";
-import { Address, IAddress, IMembership } from "interfaces/user";
+import { Address, IAddress, IMembership, Membership } from "interfaces/user";
 import Product from "models/product";
 import { Schema, model, Document } from "mongoose";
 
@@ -24,8 +24,8 @@ export type IUser = {
   refresh_token: string;
   role: ROLE;
   membership: IMembership;
-  create_at: string;
-  create_by: string;
+  created_at: string;
+  created_by: string;
   modify: IModify[];
 };
 
@@ -34,7 +34,13 @@ export type UserTypeModel = IUser & Document;
 /*******************************SCHEMA*****************************/
 
 export const userSchema = new Schema({
-  email: { type: String },
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+    lowercase: true,
+    trim: true,
+  },
   password: { type: String },
   full_name: { type: String },
   phone: { type: String },
@@ -50,9 +56,9 @@ export const userSchema = new Schema({
   access_token: { type: String },
   refresh_token: { type: String },
   role: { type: String, default: "user" },
-  membership_type: { type: Number, default: 1 },
-  create_at: { type: String, default: new Date() },
-  create_by: { type: String },
+  membership: { type: Membership, default: {} },
+  created_at: { type: String },
+  created_by: { type: String },
   modify: [Modify],
 });
 

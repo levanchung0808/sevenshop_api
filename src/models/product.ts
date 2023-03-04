@@ -14,8 +14,8 @@ export type IProduct = {
   stock: IStock[];
   status: STATUS_PRODUCT;
   categories: [];
-  create_at: string;
-  create_by: string;
+  created_at: Date;
+  created_by: string;
   modify: IModify[];
 };
 
@@ -32,8 +32,8 @@ const productSchema: Schema = new Schema({
   stock: { type: [Stock], require: true },
   status: { type: String, enum: STATUS_PRODUCT, default: "inactive" },
   categories: [{ type: Schema.Types.ObjectId, ref: "Category" }],
-  create_at: { type: String, require: true },
-  create_by: { type: String, require: true },
+  created_at: { type: String, require: true },
+  created_by: { type: String, require: true },
   modify: { type: [Modify], require: true },
 });
 

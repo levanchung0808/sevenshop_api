@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import { IAddress } from "interfaces/user";
 import User, { IUser } from "models/user";
-import moment from "moment";
 import { getIdFromReq } from "utils/token";
 
 export const getUsers = async (req: Request, res: Response) => {
@@ -31,15 +30,6 @@ export const getUserByID = async (req: Request, res: Response) => {
   }
 };
 
-function isValidDateBirthday(dateString: string) {
-  var regEx = /^\d{4}-\d{2}-\d{2}$/;
-  if (!dateString.match(regEx)) return false; // Invalid format
-  var d = new Date(dateString);
-  var dNum = d.getTime();
-  if (!dNum && dNum !== 0) return false; // NaN value, Invalid date
-  return d.toISOString().slice(0, 10) === dateString;
-}
-
 export const updateUser = async (req: Request, res: Response) => {
   try {
     const _id = getIdFromReq(req);
@@ -59,14 +49,14 @@ export const updateUser = async (req: Request, res: Response) => {
       user.avatar = avatar;
     }
 
-    if (birthday) {
-      if (!isValidDateBirthday(birthday)) {
-        return res
-          .status(500)
-          .json({ message: "Birthday not valid (YYYY-MM-DD)" });
-      }
-      user.birthday = moment(birthday).format("YYYY-MM-DD");
-    }
+    // if (birthday) {
+    //   if (!isValidDateBirthday(birthday)) {
+    //     return res
+    //       .status(500)
+    //       .json({ message: "Birthday not valid (YYYY-MM-DD)" });
+    //   }
+    //   user.birthday = moment(birthday).toDate();
+    // }
     if (address) user.address = address;
 
     await user.save();

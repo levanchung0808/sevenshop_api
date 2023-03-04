@@ -11,8 +11,8 @@ export type NotificationType = {
   image: string;
   from_user_id: string;
   to_user_id: string[];
-  create_at: string;
-  create_by: string;
+  created_at: Date;
+  created_by: string;
   modify: IModify[];
 };
 
@@ -26,8 +26,8 @@ export const notificationSchema = new Schema({
   image: { type: String, required: true },
   from_user_id: { type: Schema.Types.ObjectId, ref: User },
   to_user_id: [{ type: Schema.Types.ObjectId, ref: User }],
-  create_at: { type: Date, require: true },
-  create_by: { type: String, require: true },
+  created_at: { type: Date, require: true },
+  created_by: { type: String, require: true },
   modify: { type: [Modify], require: true },
 });
 

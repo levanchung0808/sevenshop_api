@@ -6,6 +6,7 @@ import nodemailer from "nodemailer";
 import { STATUS_USER } from "constants/user";
 import { IOTP } from "interfaces/basic";
 import Log from "libraries/log";
+import { getDateNow, getDateNowPlusMinute } from "utils/common";
 
 type AccountVerifyType = {
   email?: string;
@@ -15,11 +16,16 @@ type AccountVerifyType = {
 
 const sendMail = (
   user_id: Types.ObjectId,
-  otp: string,
+  otp: number | undefined,
   email: string,
   res: Response,
   type: string
 ) => {
+  if (!otp) {
+    return res.status(400).json({
+      message: "OTP is not valid",
+    });
+  }
   const transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
@@ -67,9 +73,11 @@ const sendMail = (
 
 const generateOTP = async () => {
   const otp = Math.floor(100000 + Math.random() * 900000);
-  const expired = new Date();
-  expired.setMinutes(expired.getMinutes() + Number(process.env.EXPIRED_OTP));
-  return { code: otp.toString(), expired };
+  const exp = getDateNowPlusMinute(Number(process.env.EXPIRED_OTP));
+  return {
+    code: otp,
+    exp,
+  };
 };
 
 export const accountVerify = async (props: AccountVerifyType) => {
@@ -103,8 +111,8 @@ export const accountVerify = async (props: AccountVerifyType) => {
     phone,
     otp,
   });
-  newUser.create_at = moment(new Date()).format("YYYY-MM-DD HH:mm");
-  newUser.create_by = "user";
+  newUser.created_at = getDateNow()
+  newUser.created_by = "user";
   await newUser.save();
   if (email) {
     sendMail(newUser._id, otp.code, newUser.email, res, "Register");
@@ -147,7 +155,7 @@ export const checkDateOTP = async (id: Types.ObjectId) => {
   const user = await User.findById(id);
   // update if otp expired
   if (user) {
-    if (moment(user.otp.expired).isBefore(new Date())) {
+    if (moment(user.otp.exp).isBefore(new Date())) {
       const otp = await generateOTP();
       await user.updateOne({
         otp,
