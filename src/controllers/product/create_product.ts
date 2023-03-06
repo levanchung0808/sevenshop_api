@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import Product, { IProduct } from "models/product";
 import User from "models/user";
-import { getDateNow } from "utils/common";
+import { getNow } from "utils/common";
 import { getIdFromReq } from "utils/token";
 
 const createProduct = async (req: Request, res: Response) => {
@@ -33,13 +33,13 @@ const createProduct = async (req: Request, res: Response) => {
       price: price,
       colors: colors,
       sizes: sizes,
-      created_at: getDateNow(),
+      created_at: getNow(),
       created_by: `${user?.email}`,
       modify: [],
     };
     newProduct.modify.push({
       action: `Create by ${user?.email}`,
-      date: getDateNow(),
+      date: getNow(),
     });
     const product = new Product(newProduct);
     await product.save();

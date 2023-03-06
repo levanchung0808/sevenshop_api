@@ -6,7 +6,7 @@ const forgotPassword = async (req: Request, res: Response) => {
   try {
     const { email, phone }: IUser = req.body;
     if (!email && !phone) {
-      return res.status(500).json({ message: "Missing email or phone" });
+      return res.status(400).json({ message: "Missing email or phone" });
     }
     if (email) {
       await accountVerifyPassword({ email, res });
@@ -15,7 +15,7 @@ const forgotPassword = async (req: Request, res: Response) => {
       await accountVerifyPassword({ phone, res });
     }
   } catch (err) {
-    return res.status(500).json({ message: "Forgot Password Err" });
+    return res.sendStatus(500);
   }
 };
 

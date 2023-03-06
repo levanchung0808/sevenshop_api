@@ -1,3 +1,4 @@
+import { getNow } from "utils/common";
 import bcrypt from "bcrypt";
 import { Request, Response } from "express";
 import User from "models/user";
@@ -26,10 +27,7 @@ const changePassword = async (req: Request, res: Response) => {
     user.password = hashPassword;
     user.access_token = accessToken;
     user.refresh_token = refreshToken;
-    user.modify = [
-      ...user.modify,
-      { action: "Change Password", date: new Date().toString() },
-    ];
+    user.modify.push({ action: "Change password", date: getNow() });
     await user.save();
     return res.status(200).json({
       message: "Change password successfully",

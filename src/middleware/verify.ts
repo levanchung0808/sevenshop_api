@@ -6,7 +6,7 @@ import nodemailer from "nodemailer";
 import { STATUS_USER } from "constants/user";
 import { IOTP } from "interfaces/basic";
 import Log from "libraries/log";
-import { getDateNow, getDateNowPlusMinute } from "utils/common";
+import { getNow, getNowPlusMinute } from "utils/common";
 
 type AccountVerifyType = {
   email?: string;
@@ -73,7 +73,7 @@ const sendMail = (
 
 const generateOTP = async () => {
   const otp = Math.floor(100000 + Math.random() * 900000);
-  const exp = getDateNowPlusMinute(Number(process.env.EXPIRED_OTP));
+  const exp = getNowPlusMinute(Number(process.env.EXPIRED_OTP));
   return {
     code: otp,
     exp,
@@ -111,7 +111,7 @@ export const accountVerify = async (props: AccountVerifyType) => {
     phone,
     otp,
   });
-  newUser.created_at = getDateNow();
+  newUser.created_at = getNow();
   newUser.created_by = "user";
   await newUser.save();
   if (email) {
@@ -155,7 +155,7 @@ export const checkDateOTP = async (id: Types.ObjectId) => {
   const user = await User.findById(id);
   // update if otp expired
   if (user) {
-    if (moment(user.otp.exp).isBefore(new Date())) {
+    if (user.otp.exp < getNow()) {
       const otp = await generateOTP();
       await user.updateOne({
         otp,

@@ -1,4 +1,4 @@
-import { getDateNow } from "utils/common";
+import { getNow } from "utils/common";
 import bcrypt from "bcrypt";
 import { STATUS_USER } from "constants/user";
 import { Request, Response } from "express";
@@ -29,15 +29,12 @@ const setPassword = async (req: Request, res: Response) => {
   user.password = hashPassword;
   user.otp = {
     code: undefined,
-    exp: getDateNow(),
+    exp: getNow(),
   };
   user.access_token = access_token;
   user.refresh_token = refresh_token;
   user.status = STATUS_USER.active;
-  user.modify = [
-    ...user.modify,
-    { action: "Set Password", date: getDateNow() },
-  ];
+  user.modify = [...user.modify, { action: "Set Password", date: getNow() }];
   await user.save();
   return res.status(200).json({
     message: "Set password success",

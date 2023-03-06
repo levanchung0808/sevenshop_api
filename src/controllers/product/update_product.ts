@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import Product, { IProduct } from "models/product";
 import User from "models/user";
-import { getDateNow } from "utils/common";
+import { getNow } from "utils/common";
 import { getIdFromReq } from "utils/token";
 
 const updateProduct = async (req: Request, res: Response) => {
@@ -86,7 +86,7 @@ const updateProduct = async (req: Request, res: Response) => {
     }
     newProduct.modify.push({
       action: `Update by ${user?.email}`,
-      date: getDateNow(),
+      date: getNow(),
     });
     await Object.assign(product, newProduct);
     await product.save();

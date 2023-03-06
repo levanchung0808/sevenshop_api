@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import Category, { ICategory } from "models/category";
 import User from "models/user";
-import { getDateNow } from "utils/common";
+import { getNow } from "utils/common";
 import { getIdFromReq } from "utils/token";
 
 const updateCategory = async (req: Request, res: Response) => {
@@ -34,7 +34,7 @@ const updateCategory = async (req: Request, res: Response) => {
     if (image) newCategory.image = image;
     newCategory.modify.push({
       action: `Update by ${user?.email}`,
-      date: getDateNow(),
+      date: getNow(),
     });
     await Object.assign(category, newCategory);
     await category.save();
