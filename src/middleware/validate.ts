@@ -2,7 +2,6 @@ import jwt from "jsonwebtoken";
 import { NextFunction, Request, Response } from "express";
 import { parseJwt } from "utils/token";
 import User from "models/user";
-import Log from "libraries/log";
 
 export const validateToken = async (
   req: Request,
@@ -10,23 +9,11 @@ export const validateToken = async (
   next: NextFunction
 ) => {
   const token = req.headers.authorization?.slice(7); // cut Bearer
-  if (!token) {
+  const user = await verifyToken(token);
+  if (!user) {
     return res.status(401).json({ message: "Access denied" });
   }
-  const { _id } = parseJwt(token);
-  const user = await User.findById(_id);
-  if (!user) {
-    return res.status(400).json({ message: "Invalid token" });
-  }
-  if (user.access_token !== token) {
-    return res.status(400).json({ message: "Invalid token" });
-  }
-  try {
-    jwt.verify(token, process.env.JWT_SECRET || "");
-    next();
-  } catch (err) {
-    return res.status(400).json({ message: "Invalid token" });
-  }
+  next();
 };
 
 export const validateAdmin = async (
@@ -35,26 +22,27 @@ export const validateAdmin = async (
   next: NextFunction
 ) => {
   const token = req.header("Authorization")?.slice(7); // cut Bearer
+  const user = await verifyToken(token);
+  if (!user || user.role !== "admin") {
+    return res.status(401).json({ message: "Access denied" });
+  }
+  next();
+};
+
+async function verifyToken(token: string | undefined) {
   if (!token) {
-    return res.status(401).json({ message: "Access denied" });
-  }
-  const { role, _id } = parseJwt(token);
-  Log.info(role);
-  const user = await User.findById(_id);
-  if (!user) {
-    return res.status(400).json({ message: "Invalid token" });
-  }
-  if (user.access_token !== token) {
-    return res.status(400).json({ message: "Invalid token" });
-  }
-  if (role !== "admin") {
-    return res.status(401).json({ message: "Access denied" });
+    return null;
   }
   try {
+    const { _id } = parseJwt(token);
+    const user = await User.findById(_id);
+    if (!user || user.access_token !== token) {
+      return null;
+    }
     jwt.verify(token, process.env.JWT_SECRET || "");
-    next();
+    return user;
+  } catch (err) {
+    return null;
   }
-  catch (err) {
-    return res.status(400).json({ message: "Invalid token" });
-  }
-};
+}
+

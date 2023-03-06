@@ -11,17 +11,15 @@ const createCategory = async (req: Request, res: Response) => {
     const user = await User.findById(id_user);
     Log.info(`Create new category`);
     const { name, description, image }: ICategory = req.body;
-    if (!name || !description || !image) {
-      return res
-        .status(400)
-        .json({ message: "Missing name, description or image" });
+    if (!name || !description) {
+      return res.status(400).json({ message: "Missing name, description" });
     }
     const newCategory: ICategory = {
       name: name,
       description: description,
-      image: image,
+      image: image ? image : "",
       created_at: getDateNow(),
-      created_by: user?.id,
+      created_by: `${user?.email}`,
       modify: [],
     };
     newCategory.modify.push({
