@@ -1,4 +1,3 @@
-import moment from "moment";
 import User from "models/user";
 import { Types } from "mongoose";
 import { Response } from "express";
@@ -7,6 +6,7 @@ import { STATUS_USER } from "constants/user";
 import { IOTP } from "interfaces/basic";
 import Log from "libraries/log";
 import { getNow, getNowPlusMinute } from "utils/common";
+import { createCart } from "controllers/cart";
 
 type AccountVerifyType = {
   email?: string;
@@ -103,6 +103,9 @@ export const accountVerify = async (props: AccountVerifyType) => {
         },
       });
     }
+    if (user.status === STATUS_USER.inactive) {
+      return res.status(500).json({ message: "Account is inactive" });
+    }
   }
   // create new user
   const otp = (await generateOTP()) as IOTP;
@@ -113,6 +116,8 @@ export const accountVerify = async (props: AccountVerifyType) => {
   });
   newUser.created_at = getNow();
   newUser.created_by = "user";
+  const cart_id = await createCart(newUser._id)
+  newUser.cart_id = cart_id;
   await newUser.save();
   if (email) {
     sendMail(newUser._id, otp.code, newUser.email, res, "Register");

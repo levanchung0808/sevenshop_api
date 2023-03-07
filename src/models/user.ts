@@ -15,7 +15,7 @@ export type IUser = {
   cover_image: string;
   gender: GENDER;
   birthday: string;
-  address: IAddress[];
+  addresses: IAddress[];
   status: STATUS_USER;
   product_favorites: [];
   recent_products: [];
@@ -24,6 +24,8 @@ export type IUser = {
   refresh_token: string;
   role: ROLE;
   membership: IMembership;
+  cart_id: string;
+  orders: string[];
   created_at: string;
   created_by: string;
   modify: IModify[];
@@ -48,7 +50,7 @@ export const userSchema = new Schema({
   cover_image: { type: String },
   gender: { type: String, enum: GENDER },
   birthday: { type: String },
-  address: [Address],
+  addresses: [Address],
   status: { type: String, enum: STATUS_USER, default: "pending" },
   product_favorites: [{ type: Schema.Types.ObjectId, ref: Product }],
   recent_products: [{ type: Schema.Types.ObjectId, ref: Product }],
@@ -57,6 +59,8 @@ export const userSchema = new Schema({
   refresh_token: { type: String },
   role: { type: String, default: "user" },
   membership: { type: Membership, default: {} },
+  cart_id: { type: Schema.Types.ObjectId, ref: "Cart" },
+  orders: [{ type: Schema.Types.ObjectId, ref: "Order" }],
   created_at: { type: String },
   created_by: { type: String },
   modify: [Modify],

@@ -14,8 +14,8 @@ const generateStock = async (req: Request, res: Response) => {
     for (let i = 0; i < colors.length; i++) {
       for (let j = 0; j < sizes.length; j++) {
         stock.push({
-          color_id: colors[i]._id,
-          size_id: sizes[j]._id,
+          color_id: colors[i]._id as string,
+          size_id: sizes[j]._id as string,
           quantity: 0,
         });
       }

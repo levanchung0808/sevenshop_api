@@ -6,7 +6,7 @@ import { getIdFromReq } from "utils/token";
 
 const createProduct = async (req: Request, res: Response) => {
   try {
-    const { id: id_user } = getIdFromReq(req);
+    const id_user = getIdFromReq(req);
     const {
       name,
       price,
@@ -19,9 +19,12 @@ const createProduct = async (req: Request, res: Response) => {
       status,
     }: IProduct = req.body;
     if (!name || !price) {
-      return res.status(400).json({ message: "Missing name, description" });
+      return res.status(400).json({ message: "Missing name, price" });
     }
     const user = await User.findById(id_user);
+    if (!user) {
+      return res.sendStatus(403);
+    }
     const newProduct: IProduct = {
       name: name,
       description: description,
@@ -34,11 +37,11 @@ const createProduct = async (req: Request, res: Response) => {
       colors: colors,
       sizes: sizes,
       created_at: getNow(),
-      created_by: `${user?.email}`,
+      created_by: `${user.email}`,
       modify: [],
     };
     newProduct.modify.push({
-      action: `Create by ${user?.email}`,
+      action: `Create by ${user.email}`,
       date: getNow(),
     });
     const product = new Product(newProduct);

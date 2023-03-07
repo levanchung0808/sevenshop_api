@@ -5,6 +5,10 @@ import userRouter from "routes/user";
 import productRouter from "routes/product";
 import authRouter from "routes/auth";
 import categoryRouter from "routes/category";
+import orderRouter from "routes/order";
+import colorRouter from "routes/color";
+import sizeRouter from "routes/size";
+import cartRouter from "routes/cart";
 import { config } from "dotenv";
 import Log from "libraries/log";
 import cors from "cors";
@@ -69,6 +73,10 @@ app.use("/users", userRouter);
 app.use("/products", productRouter);
 app.use("/categories", categoryRouter);
 app.use("/auth", authRouter);
+app.use("/colors", colorRouter);
+app.use("/sizes", sizeRouter);
+app.use("/orders", orderRouter);
+app.use("/carts", cartRouter);
 
 app.get("/ping", (req, res: Response) => {
   res.status(200).json({

@@ -13,10 +13,10 @@ const router = Router();
 const isAdmin = [validateAdmin];
 
 // Category routes
-router.get('/categories', getCategories);
-router.get('/category/:id', getCategoryById);
-router.post('/category', isAdmin, createCategory);
-router.put('/category/:id', isAdmin, updateCategory);
-router.delete('/category/:id', isAdmin, deleteCategory);
+router.get('/', getCategories);
+router.get('/:id', getCategoryById);
+router.post('/', isAdmin, createCategory);
+router.put('/:id', isAdmin, updateCategory);
+router.delete('/:id', isAdmin, deleteCategory);
 
 export default router;

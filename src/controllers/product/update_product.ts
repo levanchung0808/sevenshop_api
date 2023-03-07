@@ -1,14 +1,13 @@
 import { Request, Response } from "express";
 import Product, { IProduct } from "models/product";
 import User from "models/user";
-import { getNow } from "utils/common";
+import { getNow, updateFieldIfNew } from "utils/common";
 import { getIdFromReq } from "utils/token";
 
 const updateProduct = async (req: Request, res: Response) => {
   try {
-    const { id: id_user } = getIdFromReq(req);
+    const id_user = getIdFromReq(req);
     const { id } = req.params;
-    const user = await User.findById(id_user);
     const {
       name,
       price,
@@ -22,8 +21,12 @@ const updateProduct = async (req: Request, res: Response) => {
       sizes,
     }: IProduct = req.body;
     const product = await Product.findById(id);
+    const user = await User.findById(id_user);
     if (!product) {
       return res.sendStatus(404);
+    }
+    if (!user) {
+      return res.sendStatus(403);
     }
     if (
       product.name === name &&
@@ -40,52 +43,20 @@ const updateProduct = async (req: Request, res: Response) => {
       return res.sendStatus(304);
     }
     const newProduct: IProduct = {
-      name: product.name,
-      description: product.description,
-      images: product.images,
-      categories: product.categories,
-      stock: product.stock,
-      price_sale: product.price_sale,
-      status: product.status,
-      price: product.price,
-      colors: product.colors,
-      sizes: product.sizes,
-      created_at: product.created_at,
-      created_by: product.created_by,
-      modify: product.modify,
+      ...product,
     };
-    if (name) {
-      newProduct.name = name;
-    }
-    if (price) {
-      newProduct.price = price;
-    }
-    if (description) {
-      newProduct.description = description;
-    }
-    if (images) {
-      newProduct.images = images;
-    }
-    if (categories) {
-      newProduct.categories = categories;
-    }
-    if (stock) {
-      newProduct.stock = stock;
-    }
-    if (colors) {
-      newProduct.colors = colors;
-    }
-    if (sizes) {
-      newProduct.sizes = sizes;
-    }
-    if (price_sale) {
-      newProduct.price_sale = price_sale;
-    }
-    if (status) {
-      newProduct.status = status;
-    }
+    updateFieldIfNew(newProduct, "name", name);
+    updateFieldIfNew(newProduct, "price", price);
+    updateFieldIfNew(newProduct, "description", description);
+    updateFieldIfNew(newProduct, "images", images);
+    updateFieldIfNew(newProduct, "categories", categories);
+    updateFieldIfNew(newProduct, "stock", stock);
+    updateFieldIfNew(newProduct, "price_sale", price_sale);
+    updateFieldIfNew(newProduct, "status", status);
+    updateFieldIfNew(newProduct, "colors", colors);
+    updateFieldIfNew(newProduct, "sizes", sizes); 
     newProduct.modify.push({
-      action: `Update by ${user?.email}`,
+      action: `Update by ${user.email}`,
       date: getNow(),
     });
     await Object.assign(product, newProduct);

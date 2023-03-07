@@ -8,7 +8,7 @@ const getProductById = async (req: Request, res: Response) => {
     if (!product) {
       return res.sendStatus(404);
     }
-    return res.json(product);
+    return res.status(200).json(product);
   } catch (err) {
     return res.sendStatus(500);
   }
