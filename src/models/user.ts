@@ -51,7 +51,7 @@ export const userSchema = new Schema({
   gender: { type: String, enum: GENDER },
   birthday: { type: String },
   addresses: [Address],
-  status: { type: String, enum: STATUS_USER, default: "pending" },
+  status: { type: String, enum: STATUS_USER, default: STATUS_USER.pending },
   product_favorites: [{ type: Schema.Types.ObjectId, ref: Product }],
   recent_products: [{ type: Schema.Types.ObjectId, ref: Product }],
   otp: { type: OTP, default: {} },

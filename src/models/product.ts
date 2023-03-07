@@ -34,7 +34,7 @@ const productSchema: Schema = new Schema({
   description: { type: String, require: true },
   images: { type: Array, require: true },
   stock: { type: [Stock], require: true },
-  status: { type: String, enum: STATUS_PRODUCT, default: "active" },
+  status: { type: String, enum: STATUS_PRODUCT, default: STATUS_PRODUCT.inactive },
   categories: [{ type: Schema.Types.ObjectId, ref: "Category" }],
   colors: [{ type: Schema.Types.ObjectId, ref: "Color" }],
   sizes: [{ type: Schema.Types.ObjectId, ref: "Size" }],

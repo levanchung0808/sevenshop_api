@@ -24,7 +24,7 @@ const orderSchema = new Schema({
   user_id: { type: Schema.Types.ObjectId, ref: "User", required: true },
   products: { type: [ProductOrder], required: true },
   payment_type: { type: String, required: true },
-  status: { type: String, required: true },
+  status: { type: String, enum: STATUS_ORDER, default: STATUS_ORDER.pending },
   vouchers: { type: [String], required: true },
   created_at: { type: String, require: true },
   created_by: { type: String, require: true },
