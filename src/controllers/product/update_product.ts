@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import Product, { IProduct } from "models/product";
 import User from "models/user";
-import { getNow, updateFieldIfNew } from "utils/common";
+import { getNow } from "utils/common";
 import { getIdFromReq } from "utils/token";
 
 const updateProduct = async (req: Request, res: Response) => {
@@ -22,44 +22,28 @@ const updateProduct = async (req: Request, res: Response) => {
     }: IProduct = req.body;
     const product = await Product.findById(id);
     const user = await User.findById(id_user);
-    if (!product) {
-      return res.sendStatus(404);
-    }
-    if (!user) {
-      return res.sendStatus(403);
-    }
-    if (
-      product.name === name &&
-      product.price === price &&
-      product.description === description &&
-      product.images === images &&
-      product.categories === categories &&
-      product.stock === stock &&
-      product.price_sale === price_sale &&
-      product.status === status &&
-      product.colors === colors &&
-      product.sizes === sizes
-    ) {
-      return res.sendStatus(304);
-    }
+    if (!product) return res.sendStatus(404);
+    if (!user) return res.sendStatus(403);
     const newProduct: IProduct = {
       ...product,
+      name: name ?? product.name,
+      price: price ?? product.price,
+      description: description ?? product.description,
+      images: images ?? product.images,
+      categories: categories ?? product.categories,
+      stock: stock ?? product.stock,
+      price_sale: price_sale ?? product.price_sale,
+      status: status ?? product.status,
+      colors: colors ?? product.colors,
+      sizes: sizes ?? product.sizes,
+      modify: [
+        ...product.modify,
+        { action: `Update by ${user.email}`, date: getNow() },
+      ],
     };
-    updateFieldIfNew(newProduct, "name", name);
-    updateFieldIfNew(newProduct, "price", price);
-    updateFieldIfNew(newProduct, "description", description);
-    updateFieldIfNew(newProduct, "images", images);
-    updateFieldIfNew(newProduct, "categories", categories);
-    updateFieldIfNew(newProduct, "stock", stock);
-    updateFieldIfNew(newProduct, "price_sale", price_sale);
-    updateFieldIfNew(newProduct, "status", status);
-    updateFieldIfNew(newProduct, "colors", colors);
-    updateFieldIfNew(newProduct, "sizes", sizes); 
-    newProduct.modify.push({
-      action: `Update by ${user.email}`,
-      date: getNow(),
-    });
-    await Object.assign(product, newProduct);
+    if (JSON.stringify(newProduct) === JSON.stringify(product))
+      return res.sendStatus(304);
+    Object.assign(product, newProduct);
     await product.save();
     return res.sendStatus(200);
   } catch (err) {

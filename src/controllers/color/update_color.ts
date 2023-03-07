@@ -1,7 +1,7 @@
 import Color, { IColor } from "models/color";
 import { Request, Response } from "express";
 import User from "models/user";
-import { getNow, updateFieldIfNew } from "utils/common";
+import { getNow } from "utils/common";
 import { getIdFromReq } from "utils/token";
 
 const updateColor = async (req: Request, res: Response) => {
@@ -20,18 +20,17 @@ const updateColor = async (req: Request, res: Response) => {
     if (!user) {
       return res.sendStatus(403);
     }
-    if (color.name === name && color.code === code) {
-      return res.sendStatus(304);
-    }
     const newColor: IColor = {
       ...color,
+      name: name ?? color.name,
+      code: code ?? color.code,
+      modify: [
+        ...color.modify,
+        { action: `Update by ${user.email}`, date: getNow() },
+      ],
     };
-    updateFieldIfNew(newColor, "name", name);
-    updateFieldIfNew(newColor, "code", code);
-    newColor.modify.push({
-      action: `Update by ${user.email}`,
-      date: getNow(),
-    });
+    if (JSON.stringify(newColor) === JSON.stringify(color))
+      return res.sendStatus(304);
     await Object.assign(color, newColor);
     await color.save();
     return res.sendStatus(200);

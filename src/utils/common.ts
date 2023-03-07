@@ -20,9 +20,3 @@ export const isValidDate = (dateString: string) => {
   if (!dNum && dNum !== 0) return false; // NaN value, Invalid date
   return d.toISOString().slice(0, 10) === dateString;
 };
-
-export function updateFieldIfNew<T>(obj: T, key: keyof T, value: T[keyof T]) {
-  if (value) {
-    obj[key] = value;
-  }
-}

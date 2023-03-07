@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import Category, { ICategory } from "models/category";
 import User from "models/user";
-import { getNow, updateFieldIfNew } from "utils/common";
+import { getNow } from "utils/common";
 import { getIdFromReq } from "utils/token";
 
 const updateCategory = async (req: Request, res: Response) => {
@@ -17,23 +17,18 @@ const updateCategory = async (req: Request, res: Response) => {
     if (!user) {
       return res.sendStatus(403);
     }
-    if (
-      category?.name === name &&
-      category?.description === description &&
-      category?.image === image
-    ) {
-      return res.sendStatus(304);
-    }
     const newCategory: ICategory = {
       ...category,
+      name: name ?? category.name,
+      description: description ?? category.description,
+      image: image ?? category.image,
+      modify: [
+        ...category.modify,
+        { action: `Update by ${user.email}`, date: getNow() },
+      ],
     };
-    updateFieldIfNew(newCategory, "name", name);
-    updateFieldIfNew(newCategory, "description", description);
-    updateFieldIfNew(newCategory, "image", image);
-    newCategory.modify.push({
-      action: `Update by ${user.email}`,
-      date: getNow(),
-    });
+    if (JSON.stringify(newCategory) === JSON.stringify(category))
+      return res.sendStatus(304);
     await Object.assign(category, newCategory);
     await category.save();
     return res.sendStatus(200);
