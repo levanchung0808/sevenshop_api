@@ -13,12 +13,29 @@ const updateColor = async (req: Request, res: Response) => {
     if (!name || !code) {
       return res.status(400).json({ message: "Missing name, code" });
     }
+    if (typeof name !== "string" || typeof code !== "string") {
+      return res.status(400).json({ message: "Invalid type of name, code" });
+    }
     const color = await Color.findById(id);
     if (!color) {
       return res.sendStatus(404);
     }
     if (!user) {
       return res.sendStatus(403);
+    }
+    if (name === color.name && code === color.code) {
+      return res.sendStatus(304);
+    }
+    const existingColor = await Color.findOne({ $or: [{ name }, { code }] });
+    if (existingColor && existingColor._id.toString() !== id) {
+      let message = "Color";
+      if (existingColor.name === name) {
+        message += ` name '${name}' already exists`;
+      }
+      if (existingColor.code === code) {
+        message += ` code '${code}' already exists`;
+      }
+      return res.status(409).json({ message });
     }
     const newColor: IColor = {
       ...color,
@@ -29,8 +46,6 @@ const updateColor = async (req: Request, res: Response) => {
         { action: `Update by ${user.email}`, date: getNow() },
       ],
     };
-    if (JSON.stringify(newColor) === JSON.stringify(color))
-      return res.sendStatus(304);
     await Object.assign(color, newColor);
     await color.save();
     return res.sendStatus(200);

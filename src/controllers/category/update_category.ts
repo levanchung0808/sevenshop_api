@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import Category, { ICategory } from "models/category";
 import User from "models/user";
-import { getNow } from "utils/common";
+import { getNow, validateFields } from "utils/common";
 import { getIdFromReq } from "utils/token";
 
 const updateCategory = async (req: Request, res: Response) => {
@@ -14,8 +14,40 @@ const updateCategory = async (req: Request, res: Response) => {
     if (!category) {
       return res.sendStatus(404);
     }
+    const validateFieldsResult = validateFields({ name, description, image }, [
+      { name: "name", type: "string", required: true },
+      { name: "description", type: "string", required: true },
+      { name: "image", type: "string" },
+    ]);
+    if (validateFieldsResult) {
+      return res.status(400).json({ message: validateFieldsResult });
+    }
     if (!user) {
       return res.sendStatus(403);
+    }
+    if (
+      (name === category.name &&
+        description === category.description &&
+        image === category.image) ||
+      (name === category.name && description === category.description && !image)
+    ) {
+      return res.sendStatus(304);
+    }
+    const existingCategory = await Category.findOne({ name });
+    if (existingCategory && !existingCategory._id.equals(category._id)) {
+      return res
+        .status(409)
+        .json({ message: `Category name '${name}' already exists` });
+    }
+    const fieldsEdited = [];
+    if (name !== category.name) {
+      fieldsEdited.push("name");
+    }
+    if (description !== category.description) {
+      fieldsEdited.push("description");
+    }
+    if (image !== category.image && image) {
+      fieldsEdited.push("image");
     }
     const newCategory: ICategory = {
       ...category,
@@ -24,11 +56,12 @@ const updateCategory = async (req: Request, res: Response) => {
       image: image ?? category.image,
       modify: [
         ...category.modify,
-        { action: `Update by ${user.email}`, date: getNow() },
+        {
+          action: `Update fields: ${fieldsEdited.join(", ")} by ${user.email}`,
+          date: getNow(),
+        },
       ],
     };
-    if (JSON.stringify(newCategory) === JSON.stringify(category))
-      return res.sendStatus(304);
     await Object.assign(category, newCategory);
     await category.save();
     return res.sendStatus(200);
