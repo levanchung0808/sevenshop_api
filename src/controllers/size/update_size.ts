@@ -1,7 +1,8 @@
 import { Request, Response } from "express";
+import Color, { IColor } from "models/color";
 import Size, { ISize } from "models/size";
 import User from "models/user";
-import { getNow } from "utils/common";
+import { getNow, validateFields } from "utils/common";
 import { getIdFromReq } from "utils/token";
 
 const updateSize = async (req: Request, res: Response) => {
@@ -10,31 +11,50 @@ const updateSize = async (req: Request, res: Response) => {
     const { id } = req.params;
     const user = await User.findById(id_user);
     const { name, size }: ISize = req.body;
-    if (!name || !size) {
-      return res.status(400).json({ message: "Missing name, size" });
+    const currentSize = await Size.findById(id);
+
+    if (!currentSize) return res.sendStatus(404);
+    if (!user) return res.sendStatus(403);
+
+    const validateFieldsResult = validateFields({ name, size }, [
+      { name: "name", type: "string", required: true },
+      { name: "size", type: "string", required: true },
+    ]);
+    if (validateFieldsResult)
+      return res.status(400).json({ message: validateFieldsResult });
+
+    const existingSize = await Size.findOne({
+      $and: [{ _id: { $ne: currentSize._id } }, { $or: [{ name }, { size }] }],
+    });
+    if (existingSize) {
+      return res
+        .status(409)
+        .json({ message: "Size name or size already exists" });
     }
-    const size_old = await Size.findById(id);
-    if (!size_old) {
-      return res.sendStatus(404);
-    }
-    if (!user) {
-      return res.sendStatus(403);
-    }
+
+    const fieldsEdited = [];
+    if (name !== currentSize.name) fieldsEdited.push("name");
+    if (size !== currentSize.size) fieldsEdited.push("size");
+
+    if (!fieldsEdited.length) return res.sendStatus(304);
+
     const newSize: ISize = {
-      ...size_old,
-      name: name ?? size_old.name,
-      size: size ?? size_old.size,
+      ...currentSize.toObject(),
+      name: name ?? currentSize.name,
+      size: size ?? currentSize.size,
       modify: [
-        ...size_old.modify,
-        { action: `Update by ${user.email}`, date: getNow() },
+        ...currentSize.modify,
+        {
+          action: `Update fields: ${fieldsEdited.join(", ")} by ${user.email}`,
+          date: getNow(),
+        },
       ],
     };
-    if (JSON.stringify(newSize) === JSON.stringify(size_old))
-      return res.sendStatus(304);
-    await Object.assign(size_old, newSize);
-    await size_old.save();
+
+    await currentSize.updateOne(newSize);
     return res.sendStatus(200);
   } catch (err) {
+    console.error(err);
     return res.sendStatus(500);
   }
 };

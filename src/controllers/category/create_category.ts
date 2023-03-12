@@ -8,7 +8,7 @@ const createCategory = async (req: Request, res: Response) => {
   try {
     const id_user = getIdFromReq(req);
     const user = await User.findById(id_user);
-    const { name, description, image }: ICategory = req.body;
+    const { name, description, image = "" }: ICategory = req.body;
     const validateFieldsResult = validateFields({ name, description, image }, [
       { name: "name", type: "string", required: true },
       { name: "description", type: "string", required: true },
@@ -17,24 +17,21 @@ const createCategory = async (req: Request, res: Response) => {
     if (validateFieldsResult) {
       return res.status(400).json({ message: validateFieldsResult });
     }
-    if (!user) {
-      return res.sendStatus(403);
-    }
+    if (!user) return res.sendStatus(403);
     const existingCategory = await Category.findOne({ name });
     if (existingCategory) {
       return res
         .status(409)
         .json({ message: `Category name '${name}' already exists` });
     }
-    const newCategory: ICategory = {
-      name: name,
-      description: description,
-      image: image ? image : "",
+    const category = new Category({
+      name,
+      description,
+      image,
       created_at: getNow(),
       created_by: user.email,
       modify: [{ action: `Create by ${user.email}`, date: getNow() }],
-    };
-    const category = new Category(newCategory);
+    });
     await category.save();
     return res.status(201).json({ id: category._id });
   } catch (err) {

@@ -2,8 +2,6 @@ import { STATUS_PRODUCT } from "constants/product";
 import { IModify, Modify } from "interfaces/basic";
 import { IStock, Stock } from "interfaces/product";
 import { Document, model, Schema } from "mongoose";
-import { IColor } from "./color";
-import { ISize } from "./size";
 
 /*********************TYPE & INTERFACE*****************************/
 
@@ -15,9 +13,9 @@ export type IProduct = {
   images: string[];
   stock: IStock[];
   status: STATUS_PRODUCT;
-  categories: [];
-  colors: IColor[];
-  sizes: ISize[];
+  category_ids: string[];
+  color_ids: string[];
+  size_ids: string[];
   created_at: string;
   created_by: string;
   modify: IModify[];
@@ -35,9 +33,9 @@ const productSchema: Schema = new Schema({
   images: { type: Array, require: true },
   stock: { type: [Stock], require: true },
   status: { type: String, enum: STATUS_PRODUCT, default: STATUS_PRODUCT.inactive },
-  categories: [{ type: Schema.Types.ObjectId, ref: "Category" }],
-  colors: [{ type: Schema.Types.ObjectId, ref: "Color" }],
-  sizes: [{ type: Schema.Types.ObjectId, ref: "Size" }],
+  category_ids: { type: [String], require: true, ref: "Category" },
+  color_ids: { type: [String], require: true, ref: "Color" },
+  size_ids: { type: [String], require: true, ref: "Size" },
   created_at: { type: String, require: true },
   created_by: { type: String, require: true },
   modify: { type: [Modify], require: true },

@@ -22,39 +22,34 @@ export const isValidDate = (dateString: string) => {
   return d.toISOString().slice(0, 10) === dateString;
 };
 
+export const fieldValidation = {
+  string: (val: any) => typeof val === "string",
+  number: (val: any) => typeof val === "number",
+  boolean: (val: any) => typeof val === "boolean",
+  array: (val: any) => Array.isArray(val),
+  arrayString: (val: any) => Array.isArray(val) && val.every((v) => typeof v === "string"),
+  arrayObject: (val: any) => Array.isArray(val) && val.every((v) => typeof v === "object"),
+};
+
 export function validateFields(
   body: any,
-  fields: { name: string; type: string; required?: boolean }[]
-): string[] | undefined {
+  fields: {
+    name: string;
+    type: keyof typeof fieldValidation;
+    required?: boolean;
+  }[]
+): string | undefined {
   const errors: string[] = [];
   fields.forEach((field) => {
     if (field.required && !body[field.name]) {
       errors.push(`${field.name} is required`);
     }
-    if (body[field.name]) {
-      switch (field.type) {
-        case "string":
-          if (typeof body[field.name] !== "string") {
-            errors.push(`${field.name} must be a string`);
-          }
-          break;
-        case "number":
-          if (typeof body[field.name] !== "number") {
-            errors.push(`${field.name} must be a number`);
-          }
-          break;
-        case "boolean":
-          if (typeof body[field.name] !== "boolean") {
-            errors.push(`${field.name} must be a boolean`);
-          }
-          break;
-        default:
-          break;
+    if (body[field.name] !== undefined) {
+      const validator = fieldValidation[field.type];
+      if (!validator(body[field.name])) {
+        errors.push(`${field.name} must be a ${field.type}`);
       }
     }
   });
-  if (errors.length > 0) {
-    return errors;
-  }
-  return undefined;
+  return errors.length > 0 ? errors.join(", ") : undefined;
 }

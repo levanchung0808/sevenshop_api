@@ -15,7 +15,7 @@ const isAdmin = [validateAdmin];
 router.get('/', getProducts);
 router.get("/:id", getProductById);
 router.post('/', isAdmin, createProduct);
-router.get('/generateStock', isAdmin, generateStock);
+router.get('/generate_stock/:id', isAdmin, generateStock);
 router.put('/:id', isAdmin, updateProduct);
 router.delete('/:id', isAdmin, deleteProduct);
 

@@ -6,37 +6,34 @@ import { getIdFromReq } from "utils/token";
 
 const createColor = async (req: Request, res: Response) => {
   try {
-    const id_user = getIdFromReq(req);
-    const user = await User.findById(id_user);
     const { name, code }: IColor = req.body;
     const validateFieldsResult = validateFields({ name, code }, [
-      { name: "name", type: "string" },
-      { name: "code", type: "string" },
+      { name: "name", type: "string", required: true },
+      { name: "code", type: "string", required: true },
     ]);
-    if (validateFieldsResult) {
+    if (validateFieldsResult)
       return res.status(400).json({ message: validateFieldsResult });
-    }
+
+    const user = await User.findById(getIdFromReq(req));
+    if (!user) return res.sendStatus(403);
+
     const existingColor = await Color.findOne({ $or: [{ name }, { code }] });
     if (existingColor) {
-      let message = "Color";
-      if (existingColor.name === name) {
-        message += ` name '${name}' already exists`;
-      }
-      if (existingColor.code === code) {
-        message += ` code '${code}' already exists`;
-      }
+      const message = `Color ${
+        existingColor.name === name ? `name '${name}'` : ""
+      } ${existingColor.code === code ? `code '${code}'` : ""} already exists`;
       return res.status(409).json({ message });
     }
-    const newColor: IColor = {
-      name: name,
-      code: code,
+
+    const color = new Color({
+      name,
+      code,
       created_at: getNow(),
-      created_by: `${user?.email}`,
+      created_by: user.email,
       modify: [{ action: `Create by ${user?.email}`, date: getNow() }],
-    };
-    const color = new Color(newColor);
+    });
     await color.save();
-    return res.sendStatus(200);
+    return res.status(201).json({ id: color._id });
   } catch (err) {
     return res.sendStatus(500);
   }

@@ -18,7 +18,7 @@ export type SizeTypeModel = ISize & Document;
 
 const sizeSchema: Schema = new Schema({
   name: { type: String, require: true },
-  code: { type: String, require: true },
+  size: { type: String, require: true },
   created_at: { type: String, require: true },
   created_by: { type: String, require: true },
   modify: { type: [Modify], require: true },

@@ -11,46 +11,34 @@ const updateCategory = async (req: Request, res: Response) => {
     const user = await User.findById(id_user);
     const { name, description, image }: ICategory = req.body;
     const category = await Category.findById(id);
-    if (!category) {
-      return res.sendStatus(404);
-    }
+
+    if (!category) return res.sendStatus(404);
+    if (!user) return res.sendStatus(403);
+
     const validateFieldsResult = validateFields({ name, description, image }, [
       { name: "name", type: "string", required: true },
       { name: "description", type: "string", required: true },
       { name: "image", type: "string" },
     ]);
-    if (validateFieldsResult) {
+    if (validateFieldsResult)
       return res.status(400).json({ message: validateFieldsResult });
-    }
-    if (!user) {
-      return res.sendStatus(403);
-    }
-    if (
-      (name === category.name &&
-        description === category.description &&
-        image === category.image) ||
-      (name === category.name && description === category.description && !image)
-    ) {
-      return res.sendStatus(304);
-    }
+
     const existingCategory = await Category.findOne({ name });
-    if (existingCategory && !existingCategory._id.equals(category._id)) {
+    if (existingCategory && existingCategory._id !== category._id) {
       return res
         .status(409)
         .json({ message: `Category name '${name}' already exists` });
     }
+
     const fieldsEdited = [];
-    if (name !== category.name) {
-      fieldsEdited.push("name");
-    }
-    if (description !== category.description) {
-      fieldsEdited.push("description");
-    }
-    if (image !== category.image && image) {
-      fieldsEdited.push("image");
-    }
+    if (name !== category.name) fieldsEdited.push("name");
+    if (description !== category.description) fieldsEdited.push("description");
+    if (image !== category.image ?? image) fieldsEdited.push("image");
+
+    if (!fieldsEdited.length) return res.sendStatus(304);
+
     const newCategory: ICategory = {
-      ...category,
+      ...category.toObject(),
       name: name ?? category.name,
       description: description ?? category.description,
       image: image ?? category.image,
@@ -62,10 +50,11 @@ const updateCategory = async (req: Request, res: Response) => {
         },
       ],
     };
-    await Object.assign(category, newCategory);
-    await category.save();
+
+    await category.updateOne(newCategory);
     return res.sendStatus(200);
   } catch (err) {
+    console.error(err);
     return res.sendStatus(500);
   }
 };
