@@ -7,6 +7,7 @@ export type ICategory = {
   name: string;
   description: string;
   image: string;
+  product_ids: string[];
   created_at: string;
   created_by: string;
   modify: IModify[];
@@ -20,6 +21,7 @@ const productSchema: Schema = new Schema({
   name: { type: String, require: true },
   description: { type: String, require: true },
   image: { type: String, require: true },
+  product_ids: { type: [String], require: true },
   created_at: { type: String, require: true },
   created_by: { type: String, require: true },
   modify: { type: [Modify], require: true },

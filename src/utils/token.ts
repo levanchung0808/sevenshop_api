@@ -16,3 +16,9 @@ export const getIdFromReq = (req: Request) => {
   const _id = parseJwt(token ?? "")._id;
   return _id;
 };
+
+export const getRoleFromReq = (req: Request) => {
+  const token = req.headers.authorization?.slice(7); // cut Bearer
+  const role = parseJwt(token ?? "").role;
+  return role;
+};

@@ -1,4 +1,3 @@
-import Log from "libraries/log";
 import moment from "moment";
 
 export const formatDateTime = (date: Date | string) => {
@@ -6,11 +5,11 @@ export const formatDateTime = (date: Date | string) => {
 };
 
 export const getNow = () => {
-  return moment() + "";
+  return moment().format();
 };
 
 export const getNowPlusMinute = (minute: number) => {
-  return moment().add(minute, "minutes") + "";
+  return moment().add(minute, "minutes").format();
 };
 
 export const isValidDate = (dateString: string) => {

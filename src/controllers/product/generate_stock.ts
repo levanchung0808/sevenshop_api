@@ -33,7 +33,7 @@ const generateStock = async (req: Request, res: Response) => {
     return res.status(200).json({ stock: newStock });
   } catch (err) {
     console.error(err);
-    return res.sendStatus(500);
+    return res.status(500).json({ message: err });
   }
 };
 

@@ -18,7 +18,7 @@ export type CartTypeModel = ICart & Document;
 
 const cartSchema: Schema = new Schema({
   user_id: { type: Schema.Types.ObjectId, ref: "User", required: true },
-  product: { type: [ProductCart], required: true },
+  products: { type: [ProductCart], required: true },
   created_at: { type: String, require: true },
   created_by: { type: String, require: true },
   modify: { type: [Modify], require: true },

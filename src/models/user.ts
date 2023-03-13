@@ -26,6 +26,7 @@ export type IUser = {
   membership: IMembership;
   cart_id: string;
   orders: string[];
+  history_search: string[];
   created_at: string;
   created_by: string;
   modify: IModify[];
@@ -61,6 +62,7 @@ export const userSchema = new Schema({
   membership: { type: Membership, default: {} },
   cart_id: { type: Schema.Types.ObjectId, ref: "Cart" },
   orders: [{ type: Schema.Types.ObjectId, ref: "Order" }],
+  history_search: [{ type: String }],
   created_at: { type: String },
   created_by: { type: String },
   modify: [Modify],
